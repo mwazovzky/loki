@@ -14,6 +14,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var db *gorm.DB
+
 func homepageHandler(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Home Page")
 	fmt.Fprintln(rw, "Home Page")
@@ -21,7 +23,6 @@ func homepageHandler(rw http.ResponseWriter, r *http.Request) {
 
 func usersHandler(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Users Index Page")
-	db := connectDB()
 	u := users.New(db)
 	data := u.Find()
 	fmt.Println(data)
@@ -31,6 +32,9 @@ func usersHandler(rw http.ResponseWriter, r *http.Request) {
 func main() {
 	// Configure env variables
 	port := ":3000"
+
+	// Setup db connection
+	db = connectDB()
 
 	// Setup routing
 	sm := http.NewServeMux()
