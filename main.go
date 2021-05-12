@@ -27,7 +27,12 @@ func main() {
 	port := ":3000"
 
 	// Setup db connection
-	db = connectDB()
+	var err error
+	dsn := "loki:password@tcp(mysql:3306)/loki"
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("ERROR: db connection error")
+	}
 
 	// Setup routing
 	sm := mux.NewRouter()
@@ -39,6 +44,8 @@ func main() {
 	apiRouter.HandleFunc("/users", userHandlers.Index).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/users", userHandlers.Create).Methods(http.MethodPost)
 	apiRouter.HandleFunc("/users/{id:[0-9]+}", userHandlers.Show).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/users/{id:[0-9]+}", userHandlers.Delete).Methods(http.MethodDelete)
+	apiRouter.HandleFunc("/users/{id:[0-9]+}/update", userHandlers.Update).Methods(http.MethodPut)
 
 	// Configure http server
 	server := &http.Server{
@@ -68,13 +75,4 @@ func main() {
 	log.Printf("Recieved terminate signal, graceful shutdown, signal: [%s]", sig)
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	server.Shutdown(ctx)
-}
-
-func connectDB() *gorm.DB {
-	dsn := "loki:password@tcp(mysql:3306)/loki"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("ERROR: db connection error")
-	}
-	return db
 }
