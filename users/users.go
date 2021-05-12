@@ -17,8 +17,8 @@ type Users struct {
 	db *gorm.DB
 }
 
-func New(db *gorm.DB) Users {
-	return Users{db}
+func New(db *gorm.DB) *Users {
+	return &Users{db}
 }
 
 func (u Users) Find() []User {
