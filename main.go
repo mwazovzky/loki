@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,25 +10,22 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/mwazovzky/loki/handlers"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
+var port string
 var db *gorm.DB
 
+func init() {
+	godotenv.Load()
+	port = fmt.Sprintf(":%s", os.Getenv("PORT"))
+	db = connectDB()
+}
+
 func main() {
-	// Configure env variables
-	port := ":3000"
-
-	// Setup db connection
-	var err error
-	dsn := "loki:password@tcp(mysql:3306)/loki"
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("ERROR: db connection error")
-	}
-
 	// Setup routing
 	sm := mux.NewRouter()
 
@@ -73,4 +71,21 @@ func main() {
 	log.Printf("Recieved terminate signal, graceful shutdown, signal: [%s]", sig)
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	server.Shutdown(ctx)
+}
+
+func connectDB() *gorm.DB {
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_DATABASE")
+	dbUsername := os.Getenv("DB_USERNAME")
+	dbPassword := os.Getenv("DB_PASSWORD")
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, dbHost, dbPort, dbName)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		panic("ERROR: db connection error")
+	}
+
+	return db
 }
