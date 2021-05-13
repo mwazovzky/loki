@@ -7,10 +7,10 @@ import (
 )
 
 type User struct {
-	ID       int
-	Name     string
-	Email    string
-	Password string
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
 }
 
 type Users struct {
