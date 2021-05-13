@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/mwazovzky/loki/handlers"
@@ -17,11 +18,13 @@ import (
 )
 
 var port string
+var allowedOrigin string
 var db *gorm.DB
 
 func init() {
 	godotenv.Load()
 	port = fmt.Sprintf(":%s", os.Getenv("PORT"))
+	allowedOrigin = os.Getenv("ALLOWED_ORIGIN")
 	db = connectDB()
 }
 
@@ -43,10 +46,17 @@ func main() {
 
 	pagesRouter.HandleFunc("/", pagesHandlers.Home)
 
+	// CORS
+	cors := gohandlers.CORS(
+		gohandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+		gohandlers.AllowedOrigins([]string{allowedOrigin}),
+		gohandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+	)
+
 	// Configure http server
 	server := &http.Server{
 		Addr:         port,
-		Handler:      sm,
+		Handler:      cors(sm),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
