@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,11 +15,6 @@ import (
 )
 
 var db *gorm.DB
-
-func homepageHandler(rw http.ResponseWriter, r *http.Request) {
-	log.Println("Home Page")
-	fmt.Fprintln(rw, "Home Page")
-}
 
 func main() {
 	// Configure env variables
@@ -36,7 +30,6 @@ func main() {
 
 	// Setup routing
 	sm := mux.NewRouter()
-	sm.HandleFunc("/", homepageHandler)
 
 	userHandlers := handlers.NewUserHandlers(db)
 	apiRouter := sm.PathPrefix("/api").Subrouter()
@@ -46,6 +39,11 @@ func main() {
 	apiRouter.HandleFunc("/users/{id:[0-9]+}", userHandlers.Show).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/users/{id:[0-9]+}", userHandlers.Delete).Methods(http.MethodDelete)
 	apiRouter.HandleFunc("/users/{id:[0-9]+}/update", userHandlers.Update).Methods(http.MethodPut)
+
+	pagesHandlers := handlers.NewPagesHandlers()
+	pagesRouter := sm.Methods(http.MethodGet).Subrouter()
+
+	pagesRouter.HandleFunc("/", pagesHandlers.Home)
 
 	// Configure http server
 	server := &http.Server{
