@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/go-playground/validator"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -20,19 +21,21 @@ import (
 var port string
 var allowedOrigin string
 var db *gorm.DB
+var validate *validator.Validate
 
 func init() {
 	godotenv.Load()
 	port = fmt.Sprintf(":%s", os.Getenv("PORT"))
 	allowedOrigin = os.Getenv("ALLOWED_ORIGIN")
 	db = connectDB()
+	validate = validator.New()
 }
 
 func main() {
 	// Setup routing
 	sm := mux.NewRouter()
 
-	userHandlers := handlers.NewUserHandlers(db)
+	userHandlers := handlers.NewUserHandlers(db, validate)
 	apiRouter := sm.PathPrefix("/api").Subrouter()
 
 	apiRouter.HandleFunc("/users", userHandlers.Index).Methods(http.MethodGet)
