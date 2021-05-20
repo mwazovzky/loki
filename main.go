@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/mwazovzky/loki/handlers"
+	"github.com/mwazovzky/loki/middleware"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -48,6 +49,8 @@ func main() {
 	pagesRouter := sm.Methods(http.MethodGet).Subrouter()
 
 	pagesRouter.HandleFunc("/", pagesHandlers.Home)
+
+	sm.Use(middleware.Logging)
 
 	// CORS
 	cors := gohandlers.CORS(
