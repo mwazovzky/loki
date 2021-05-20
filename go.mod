@@ -3,6 +3,7 @@ module github.com/mwazovzky/loki
 go 1.16
 
 require (
+	github.com/getsentry/sentry-go v0.10.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect

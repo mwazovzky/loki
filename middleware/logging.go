@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/getsentry/sentry-go"
 )
 
 func Logging(next http.Handler) http.Handler {
@@ -18,5 +20,6 @@ func Logging(next http.Handler) http.Handler {
 			time.Since(start)/1e6,
 		)
 		log.Println(msg)
+		sentry.CaptureMessage(msg)
 	})
 }

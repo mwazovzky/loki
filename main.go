@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/go-playground/validator"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -33,6 +34,10 @@ func init() {
 }
 
 func main() {
+	// Setup logging
+	connectSentry()
+	defer sentry.Flush(2 * time.Second) // Flush buffered events before the program terminates
+
 	// Setup routing
 	sm := mux.NewRouter()
 
@@ -104,4 +109,14 @@ func connectDB() *gorm.DB {
 	}
 
 	return db
+}
+
+func connectSentry() {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn: os.Getenv("SENTRY_DSN"),
+	})
+
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
 }
